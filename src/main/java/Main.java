@@ -21,15 +21,12 @@ public class Main {
                 var serverOutputWriter = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()))) {
                 while (clientSocket.isConnected()) {
                     String inputLine = clientInputReader.readLine();
-                    System.out.println(inputLine);
                     if ("PING".equals(inputLine)) {
                         serverOutputWriter.write("+PONG\r\n");
                         serverOutputWriter.flush();
                     } else {
                         System.out.println("Unexpected input:");
                         System.out.println(inputLine);
-                        serverOutputWriter.write("Unexpected input:" + inputLine + "\n");
-                        serverOutputWriter.flush();
                     }
 
                 }
