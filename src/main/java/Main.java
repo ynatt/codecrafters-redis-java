@@ -1,45 +1,40 @@
+import commands.CommandReader;
+import resp.RespValue;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.util.concurrent.Executors;
 
 public class Main {
-    public static void main(String[] args){
-        // You can use print statements as follows for debugging, they'll be visible when running tests.
+    public static void main(String[] args) {
         System.out.println("Logs from your program will appear here!");
 
-        // Uncomment the code below to pass the first stage
         int port = 6379;
         try (var serverSocket = new ServerSocket(port)) {
-            // Since the tester restarts your program quite often, setting SO_REUSEADDR
-            // ensures that we don't run into 'Address already in use' errors
             serverSocket.setReuseAddress(true);
-            // Wait for connection from client.
             try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
                 while (true) {
                     var clientSocket = serverSocket.accept();
                     executor.submit(() -> {
-                        System.out.println("Client is connected");
-                        try (var clientInputReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                             var serverOutputWriter = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()))) {
-                            while (clientSocket.isConnected()) {
-                                String inputLine = clientInputReader.readLine();
-                                if ("PING".equals(inputLine)) {
-                                    serverOutputWriter.write("+PONG\r\n");
-                                    serverOutputWriter.flush();
-                                } else {
-                                    System.out.println("Unexpected input:");
-                                    System.out.println(inputLine);
-                                }
-
+                        System.out.println("Client connected");
+                        try (var out = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
+                            var in = clientSocket.getInputStream()) {
+                            var reader = new CommandReader(in);
+                            RespValue command;
+                            while ((command = reader.readCommand()) != null) {
+                                System.out.println(command);
+                                String response = reader.handle(command).encode();
+                                out.write(response);
+                                out.flush();
                             }
-                            System.out.println("Client is disconnected");
                         } catch (IOException e) {
+                            System.out.println("IOException");
                             throw new RuntimeException(e);
                         }
+                        System.out.println("Client disconnected");
                     });
                 }
             }
-//            clientSocket.getOutputStream().write("+PONG\r\n".getBytes());
         } catch (IOException e) {
             System.out.println("IOException: " + e.getMessage());
         }
