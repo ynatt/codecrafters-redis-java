@@ -1,6 +1,5 @@
-package resp;
+package vel.vn.resp;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +23,7 @@ public sealed interface RespValue
     record Array(List<RespValue> elements) implements RespValue {}
     record Null() implements RespValue {}
 
-    default String encode() {
+    default String encode() {// TODO: right to out
         return switch (this) {
             case SimpleString(var v) -> "+" + v + CRLF;
             case Error(var e, var m) -> "-" + e + (m.isEmpty() ? "" : " " + m) + CRLF;

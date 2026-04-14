@@ -1,5 +1,6 @@
-import commands.CommandReader;
-import resp.RespValue;
+import vel.vn.commands.CommandReader;
+import vel.vn.resp.RESPParser;
+import vel.vn.resp.RespValue;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -10,6 +11,7 @@ public class Main {
         System.out.println("Logs from your program will appear here!");
 
         int port = 6379;
+        CommandReader commandReader = new CommandReader();
         try (var serverSocket = new ServerSocket(port)) {
             serverSocket.setReuseAddress(true);
             try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
@@ -18,12 +20,11 @@ public class Main {
                     executor.submit(() -> {
                         System.out.println("Client connected");
                         try (var out = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
-                            var in = clientSocket.getInputStream()) {
-                            var reader = new CommandReader(in);
+                            var in = new BufferedInputStream(clientSocket.getInputStream(), 512)) {
                             RespValue command;
-                            while ((command = reader.readCommand()) != null) {
+                            while ((command = RESPParser.parse(in)) != null) {
                                 System.out.println(command);
-                                String response = reader.handle(command).encode();
+                                String response = commandReader.handle(command).encode();
                                 out.write(response);
                                 out.flush();
                             }

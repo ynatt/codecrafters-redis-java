@@ -3,3 +3,6 @@ $4
 PING
 $3
 hey
+*1
+$4
+PING
