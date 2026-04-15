@@ -15,17 +15,27 @@ public class Set implements Command{
                 var option = ((RespValue.BulkString) args.get(2)).value();
                 switch (option.toUpperCase()) {
                     case "EX":
-                        if (args.get(3) instanceof RespValue.Long) {
-                            expiryMillis = ((RespValue.Long) args.get(3)).value() * 1000;
-                        } else {
-                            return new RespValue.Error("ERR", "after EX should be a number");
+                        switch (args.get(3)) {
+                            case RespValue.Long number:
+                                expiryMillis = number.value() * 1000;
+                                break;
+                            case RespValue.BulkString string:
+                                expiryMillis = Long.parseLong(string.value()) * 1000;
+                                break;
+                            default:
+                                return new RespValue.Error("ERR", "after EX should be a bulk string with number");
                         }
                         break;
                     case "PX":
-                        if (args.get(3) instanceof RespValue.Long) {
-                            expiryMillis = ((RespValue.Long) args.get(3)).value();
-                        } else {
-                            return new RespValue.Error("ERR", "after PX should be a number");
+                        switch (args.get(3)) {
+                            case RespValue.Long number:
+                                expiryMillis = number.value();
+                                break;
+                            case RespValue.BulkString string:
+                                expiryMillis = Long.parseLong(string.value());
+                                break;
+                            default:
+                                return new RespValue.Error("ERR", "after PX should be a bulk string with number");
                         }
                         break;
                     default:
