@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class CommandReader {
 
-    private Map<String, Command> commands;
+    private final Map<String, Command> commands;
 
     public CommandReader() {
         commands = new HashMap<>();
@@ -19,11 +19,10 @@ public class CommandReader {
     }
 
     public RespValue handle(RespValue value) {
-        if (!(value instanceof RespValue.Array array)) {
+        if (!(value instanceof RespValue.Array(List<RespValue> elements))) {
             return new RespValue.Error("ERR", "expected array command");
         }
 
-        List<RespValue> elements = array.elements();
         if (elements.isEmpty()) {
             return new RespValue.Error("ERR", "empty command");
         }
