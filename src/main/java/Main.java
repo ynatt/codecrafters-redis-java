@@ -25,6 +25,7 @@ public class Main {
                             while ((command = RESPParser.parse(in)) != null) {
                                 System.out.println(command);
                                 String response = commandReader.handle(command).encode();
+                                System.out.println(response);
                                 out.write(response);
                                 out.flush();
                             }
