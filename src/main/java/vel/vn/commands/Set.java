@@ -12,7 +12,7 @@ public class Set implements Command{
         Long expiryMillis = null;
         if (args.size() > 2) {
             if(args.get(2) instanceof RespValue.BulkString) {
-                var option = args.get(2).encode();
+                var option = ((RespValue.BulkString) args.get(2)).value();
                 switch (option.toUpperCase()) {
                     case "EX":
                         if (args.get(3) instanceof RespValue.Long) {
